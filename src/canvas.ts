@@ -1,7 +1,7 @@
 import debounce from 'lodash-es/debounce';
 import settings from './settings';
 import loadFont from './utils/loadFont';
-const {
+let {
   canvasHeight,
   canvasWidth,
   fontSize,
@@ -13,14 +13,14 @@ const {
   hollowPath,
 } = settings;
 const font = `${fontSize}px RoGSanSrfStd-Bd, GlowSansSC-Normal-Heavy_diff, apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif`;
-const subtitleFont = `${subtitleFontSize}px RoGSanSrfStd-Bd, GlowSansSC-Normal-Heavy_diff, apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif`;
+let subtitleFont = `${subtitleFontSize}px RoGSanSrfStd-Bd, GlowSansSC-Normal-Heavy_diff, apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif`;
 
 export default class LogoCanvas {
   public canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  public textL = 'Blue';
-  public textR = 'Archive';
-  public subtitle = 'ブルーアーカイブ';
+  public textL = 'ブルー';
+  public textR = 'アーカイブ';
+  public subtitle = 'BlueArchive';
   private textMetricsL: TextMetrics | null = null;
   private textMetricsR: TextMetrics | null = null;
   private textMetricsST: TextMetrics | null = null;
@@ -100,7 +100,7 @@ export default class LogoCanvas {
     c.fillText(this.textR, this.canvasWidthL, this.canvas.height * textBaseLine);
     c.resetTransform();
     c.font = subtitleFont;
-    c.setTransform(1, 0, horizontalTilt * 1, 1, 0, 0);
+    c.setTransform(1, 0, horizontalTilt, 1, 0, 0);
     c.textAlign = 'end';
     c.fillText(this.subtitle, this.canvasWidthL + this.textWidthR + subtitleFontSize, this.canvas.height * textBaseLine + subtitleFontSize + 5);
     c.resetTransform();
@@ -135,12 +135,19 @@ export default class LogoCanvas {
     );
   }
   bindEvent() {
-    const process = (id: 'textL' | 'textR' | 'subtitle', el: HTMLInputElement) => {
-      this[id] = el.value;
+    const process = (id: 'textL' | 'textR' | 'subtitle' | 'subtitleSize', el: HTMLInputElement) => {
+      if (id === 'subtitleSize') {
+        subtitleFontSize = parseInt(el.value);
+        subtitleFont = `${subtitleFontSize}px RoGSanSrfStd-Bd, GlowSansSC-Normal-Heavy_diff, apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif`;
+      }
+      else {
+        this[id] = el.value;
+      }
       this.draw();
     };
-    for (const t of ['textL', 'textR', 'subtitle']) {
-      const id = t as 'textL' | 'textR' | 'subtitle';
+
+    for (const t of ['textL', 'textR', 'subtitle' ,'subtitleSize']) {
+      const id = t as 'textL' | 'textR' | 'subtitle' | 'subtitleSize';
       const el = document.getElementById(id)! as HTMLInputElement;
       el.addEventListener('compositionstart', () => el.setAttribute('composing', ''));
       el.addEventListener('compositionend', () => {
@@ -234,7 +241,7 @@ export default class LogoCanvas {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${this.textL}${this.textR}_ba-style@nulla.top.png`;
+      a.download = `${this.textL}${this.textR}_ba-style.png`;
       a.click();
       URL.revokeObjectURL(url);
     });
